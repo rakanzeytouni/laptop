@@ -2,20 +2,28 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/navbar/page";
 import { useSession } from "next-auth/react";
-import { CreateOrder, Getallcarts, UpdateCartQuantity } from "@/components/action/action";
+import { CreateOrder, deleteAllCart, deletecart, Getallcarts, UpdateCartQuantity } from "@/components/action/action";
+import { useRouter } from "next/navigation";
 interface CartItem {
     id: string;
     brandName: string;
     quantity: number;
     userId: string;
 }
-
 export default function Cart() {
+    const handleDeleteAll = async () => {
+        if (!session?.user?.id) {
+            alert("You must be logged in.");
+            return;
+        }
+        await deleteAllCart(session.user.id);
+        fetchCart(session.user.id);
+    };
     const { data: session, status } = useSession();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isOrdering, setIsOrdering] = useState(false);
-
+    const router = useRouter();
     const cartCount = cartItems.length;
     const fetchCart = useCallback(async (userId: string) => {
         setIsLoading(true);
@@ -29,7 +37,7 @@ export default function Cart() {
         } finally {
             setIsLoading(false);
         }
-    }, []); 
+    }, []);
 
     useEffect(() => {
         if (status === "authenticated" && session?.user?.id) {
@@ -86,11 +94,33 @@ export default function Cart() {
     };
     
 
+    const deletelaptopTocart = async (userId: string, brandName: string) => {
+        await deletecart(userId, brandName);
+        if (session?.user?.id) fetchCart(session.user.id);
+    };
+   
     if (isLoading) {
+        return (
+            <>
+                <Navbar cartCount={cartCount} />
+                <div className="container mx-auto p-6">
+                    <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+                    <div className="text-center text-lg">Loading your cart...</div>
+                </div>
+            </>
+        );
     }
-    
+
     if (cartItems.length === 0) {
-        
+        return (
+            <>
+                <Navbar cartCount={cartCount} />
+                <div className="container mx-auto p-6">
+                    <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+                    <div className="text-center text-lg">Your cart is empty.</div>
+                </div>
+            </>
+        );
     }
 
     return (
@@ -98,11 +128,18 @@ export default function Cart() {
             <Navbar cartCount={cartCount} />
             <div className="container mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6">Shopping Cart ({cartCount} Items)</h1>
-                
+                <button
+                    onClick={handleDeleteAll}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-6"
+                >
+                    Delete All
+                </button>
                 <div className="space-y-4">
                     {cartItems.map((item) => (
                         <div key={item.id} className="flex justify-between items-center border p-4 rounded-lg shadow-sm">
                             <span className="text-lg font-semibold flex-1">{item.brandName}</span>
+                            <button onClick={() => deletelaptopTocart(item.userId, item.brandName)}
+                                className=" bg-red-500 ">deletecart</button>
                             
                             {/* Quantity Controls */}
                             <div className="flex items-center space-x-2">

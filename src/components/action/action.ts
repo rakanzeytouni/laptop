@@ -47,3 +47,18 @@ export async function CreateOrder(userId: string) {
         return newOrder;
     });
 }
+export async function deleteAllCart(userId:string){
+    return await prisma.cartItem.deleteMany({
+        where:{userId:userId},
+    })
+}
+export async function deletecart(userId: string, brandName: string) {
+  return await prisma.cartItem.delete({
+    where: {
+      userId_brandName: {
+        userId,
+        brandName
+      }
+    }
+  });
+}

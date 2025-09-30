@@ -1,22 +1,39 @@
 "use client";
-import { useState } from 'react';
-import { Bars3Icon, XMarkIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
+import { useState } from "react";
+import { Bars3Icon, XMarkIcon, ShoppingCartIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
+declare global {
+  interface Window {
+    gapi?: any; 
+  }
+}
 interface NavbarProps {
   cartCount: number;
 }
 
-export default function Navbar( { cartCount }: NavbarProps) {
-  
+export default function Navbar({ cartCount }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+const handleSignout = () => {
+  localStorage.removeItem("currentUser");
+if (window.gapi) {
+  const auth2 = window.gapi.auth2.getAuthInstance();
+  if (auth2) auth2.signOut();
+}
+  if (window?.gapi) {
+    const auth2 = window.gapi?.auth2?.getAuthInstance();
+    if (auth2) auth2.signOut().then(() => console.log("Google signed out"));
+  }
+  window.location.href = "/login";
+};
+
 
   return (
     <header className="bg-gradient-to-r from-red-500 via-purple-600 to-blue-700 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center gap-3">
           <svg
             width="36"
@@ -40,59 +57,72 @@ export default function Navbar( { cartCount }: NavbarProps) {
               strokeLinejoin="round"
             />
           </svg>
-          <h1 className="text-2xl font-semibold">Rakan laptops</h1>
+          <h1 className="text-2xl font-semibold">Rakan Laptops</h1>
         </div>
+
+        {/* Desktop Menu */}
         <nav className="hidden md:flex gap-10 text-lg font-medium">
-          <a href="/home" className="hover:text-yellow-300 transition">Home</a>
-          <a href="/product" className="hover:text-yellow-300 transition">Products</a>
-          <a href="#" className="hover:text-yellow-300 transition">About Us</a>
-          <a href="#" className="hover:text-yellow-300 transition">Contact</a>
+          {["Home", "Products", "About Us", "Contact"].map((item) => (
+            <Link key={item} href={item === "Home" ? "/home" : item === "Products" ? "/product" : "#"} className="hover:text-yellow-300 transition">
+              {item}
+            </Link>
+          ))}
         </nav>
-        <div className="hidden md:block">
-                   <Link href={"/cart"}>
-          <button className="bg-white text-gray-900 font-semibold px-4 py-2 rounded-full cursor-pointer hover:rounded-2xl transition">
-               {cartCount > 0 && (
-          <span className="absolute   -right-1 mr-40  bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-            {cartCount}
-          </span>
-               )}
-            <ShoppingCartIcon className="h-6 w-6 text-black" />
-          </button>
+
+        {/* Desktop Cart & Logout */}
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/cart" className="relative">
+            <button className="bg-white text-gray-900 font-semibold px-4 py-2 rounded-full hover:rounded-2xl transition relative">
+              <ShoppingCartIcon className="h-6 w-6 text-black" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </Link>
+          <button
+            onClick={handleSignout}
+            className="bg-red-500 text-amber-50 px-4 py-2 rounded-full hover:rounded-2xl transition"
+          >
+            Log Out
+          </button>
         </div>
+
+        {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-4">
-            <Link href={"/cart"}>
-          <button className="bg-white text-gray-900 font-semibold p-2 rounded-full cursor-pointer hover:rounded-2xl transition">
-            <ShoppingCartIcon className="h-6 w-6 text-black" />
-                  {cartCount > 0 && (
-          <span className="absolute   -right-1 mr-20 top-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-            {cartCount}
-          </span>
-               )}
-          </button>
+          <Link href="/cart" className="relative">
+            <button className="bg-white text-gray-900 p-2 rounded-full hover:rounded-2xl transition relative">
+              <ShoppingCartIcon className="h-6 w-6 text-black" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </Link>
-        
           <button onClick={toggleMobileMenu} className="focus:outline-none">
-            {isMobileMenuOpen ? (
-              <XMarkIcon className="h-8 w-8 text-white" />
-            ) : (
-              <Bars3Icon className="h-8 w-8 text-white" />
-            )}
+            {isMobileMenuOpen ? <XMarkIcon className="h-8 w-8 text-white" /> : <Bars3Icon className="h-8 w-8 text-white" />}
           </button>
-        
-          
         </div>
       </div>
+
+      {/* Mobile Menu */}
       <div
-        className={`md:hidden ${
-          isMobileMenuOpen ? 'block' : 'hidden'
-        } w-full bg-gray-900 bg-opacity-95 backdrop-blur-sm shadow-inner transition-all duration-300 ease-in-out`}
+        className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"} w-full bg-gray-900 bg-opacity-95 backdrop-blur-sm shadow-inner transition-all duration-300 ease-in-out`}
       >
         <nav className="flex flex-col items-center py-6 text-lg font-medium space-y-4">
-          <a href="/home" className="hover:text-yellow-300 transition">Home</a>
-          <a href="/product" className="hover:text-yellow-300 transition">Products</a>
-          <a href="#" className="hover:text-yellow-300 transition">About Us</a>
-          <a href="#" className="hover:text-yellow-300 transition">Contact</a>
+          {["Home", "Products", "About Us", "Contact"].map((item) => (
+            <Link key={item} href={item === "Home" ? "/home" : item === "Products" ? "/product" : "#"} className="hover:text-yellow-300 transition">
+              {item}
+            </Link>
+          ))}
+          <button
+            onClick={handleSignout}
+            className="bg-red-500 text-amber-50 w-80 py-2 rounded-2xl flex justify-center items-center hover:opacity-90 transition"
+          >
+            Log Out
+          </button>
         </nav>
       </div>
     </header>
