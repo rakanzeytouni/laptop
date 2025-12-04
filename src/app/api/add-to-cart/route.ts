@@ -9,9 +9,9 @@ export async function POST(req: Request) {
     if (!session || !session.user || !session.user.id) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    const { brandName } = await req.json();
+    const { brandName , price } = await req.json();
 
-    if (!brandName) {
+    if (!brandName ||!price) {
         return NextResponse.json({ message: "Missing brandName" }, { status: 400 });
     }
 
@@ -23,15 +23,20 @@ export async function POST(req: Request) {
         userId_brandName: { 
             userId: userId,
             brandName: brandName,
+           
+            
         }
     },
     update: {
-        quantity: { increment: 1 } 
+        quantity: { increment: 1 }, 
+         price:price
     },
     create: {
         userId: userId,
         brandName: brandName,
         quantity: 1,
+        price:price
+
     },
 });
         return NextResponse.json({ 

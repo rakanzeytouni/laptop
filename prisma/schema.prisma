@@ -7,8 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-
 }
 model User { 
   id String @id @default(cuid()) 
@@ -65,13 +63,15 @@ model Laptop {
   id String @id @default(cuid())
    brandName String 
   quantity  Int 
+   price      Float  
    orderId String?
     order Order? @relation(fields: [orderId], references: [id])
 }
 model CartItem {
     id          String  @id @default(cuid())
     brandName   String  
-    quantity    Int    
+    quantity    Int 
+    price      Float? 
       userId      String
     user        User    @relation(fields: [userId], references: [id])
     @@unique([userId, brandName])
